@@ -33,6 +33,7 @@ import (
 	"github.com/intelsdi-x/snap/core/ctypes"
 
 	"github.com/intelsdi-x/snap-plugin-publisher-kairosdb/kairos"
+	"github.com/intelsdi-x/snap/core/serror"
 )
 
 const (
@@ -64,14 +65,16 @@ func (pub *publisher) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
 
 	r1, err := cpolicy.NewStringRule("host", true)
 	if err != nil {
-		return nil, err
+		fields := map[string]interface{}{"StringRule": "host"}
+		return nil, serror.New(err, fields)
 	}
 	r1.Description = "KairosDB host"
 	config.Add(r1)
 
 	r2, err := cpolicy.NewIntegerRule("port", true)
 	if err != nil {
-		return nil, err
+		fields := map[string]interface{}{"StringRule": "port"}
+		return nil, serror.New(err, fields)
 	}
 	r2.Description = "KairosDB port"
 	config.Add(r2)
@@ -93,11 +96,13 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 			logger.WithFields(log.Fields{
 				"err": err,
 			}).Error("decoding error")
-			return err
+			fields := map[string]interface{}{"Decode": "metrics"}
+			return serror.New(err, fields)
 		}
 	default:
 		logger.Errorf("unknown content type '%v'", contentType)
-		return fmt.Errorf("Unknown content type '%s'", contentType)
+		fields := map[string]interface{}{"contentType": "unknown"}
+		return serror.New(fmt.Errorf("Unknown content type '%s'", contentType), fields)
 	}
 
 	// translate metrics to KairosDB publishing format
@@ -129,7 +134,9 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 		logger.WithFields(log.Fields{
 			"err": err,
 		}).Error("Serialization error")
-		return err
+		fields := map[string]interface{}{"Marshal": "points"}
+		return serror.New(err, fields)
+
 	}
 
 	// prepare publishing request
@@ -149,7 +156,8 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 		logger.WithFields(log.Fields{
 			"err": err,
 		}).Error("Request error")
-		return err
+		fields := map[string]interface{}{"Request": "send"}
+		return serror.New(err, fields)
 	}
 	defer resp.Body.Close()
 
@@ -158,7 +166,8 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 		logger.WithFields(log.Fields{
 			"err": err,
 		}).Error("Response error ", resp.StatusCode)
-		return err
+		fields := map[string]interface{}{"Response": resp.Status}
+		return serror.New(err, fields)
 	}
 
 	return nil

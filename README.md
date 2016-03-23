@@ -21,7 +21,7 @@ It's used in the [snap framework](http://github.com/intelsdi-x/snap).
 
 ### System Requirements
 
-* [golang 1.4+](https://golang.org/dl/)
+* [golang 1.4+](https://golang.org/dl/) for building plugin from source code
 
 Support Matrix
 
@@ -48,18 +48,61 @@ This builds the plugin in `/build/rootfs/`
 
 ### Configuration and Usage
 * Set up the [snap framework](https://github.com/intelsdi-x/snap/blob/master/README.md#getting-started)
-* Ensure `$SNAP_PATH` is exported  
-`export SNAP_PATH=$GOPATH/src/github.com/intelsdi-x/snap/build`
+Task manifest configuration is described in snap's documentation. In order to use KairosDB publisher 
+you have to add section "publish" then specify following options:
+- `"host"` - KairosDB host address (ex. `"127.0.0.1"`)
+- `"port"` -  KairosDB REST API port (ex. `"8083"`)
 
 ## Documentation
-<< @TODO
+
+For details on KairosDB, please refer to [documentation](https://kairosdb.github.io/docs/build/html/index.html).
 
 ### Examples
-<< @TODO
+Example task manifest to use KairosDB plugin:
+```json
+{
+    "version": 1,
+    "schedule": {
+        "type": "simple",
+        "interval": "1s"
+    },
+    "workflow": {
+        "collect": {
+            "metrics": {
+                "/intel/mock/foo": {},
+                "/intel/mock/bar": {},
+                "/intel/mock/*/baz": {}
+            },
+            "config": {
+                "/intel/mock": {
+                    "user": "root",
+                    "password": "secret"
+                }
+            },
+            "process": [
+                {
+                    "plugin_name": "passthru",
+                    "process": null,
+                    "publish": [
+                        {
+                            "plugin_name": "kairosdb",
+                            "config": {
+                                "host": "127.0.0.1",
+                                "port": 2003
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+```
 
 ### Roadmap
 
-There isn't a current roadmap for this plugin, but it is in active development. As we launch this plugin, we do not have any outstanding requirements for the next release.
+- alternative publishing method via telnet
+- alternative publishing method via Graphite protocol
 
 If you have a feature request, please add it as an [issue](https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/issues/new) and/or submit a [pull request](https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/pulls).
 
