@@ -31,7 +31,6 @@ TEST_SUITE=$1
 if [[ $TEST_SUITE == "unit" ]]; then
 	go get github.com/axw/gocov/gocov
 	go get github.com/mattn/goveralls
-	go get golang.org/x/tools/cmd/vet
 	go get golang.org/x/tools/cmd/goimports
 	go get github.com/smartystreets/goconvey/convey
 	go get github.com/smartystreets/assertions
