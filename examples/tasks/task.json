@@ -1,0 +1,37 @@
+{
+    "version": 1,
+    "schedule": {
+        "type": "simple",
+        "interval": "1s"
+    },
+    "workflow": {
+        "collect": {
+            "metrics": {
+                "/intel/mock/foo": {},
+                "/intel/mock/bar": {},
+                "/intel/mock/*/baz": {}
+            },
+            "config": {
+                "/intel/mock": {
+                    "user": "root",
+                    "password": "secret"
+                }
+            },
+            "process": [
+                {
+                    "plugin_name": "passthru",
+                    "process": null,
+                    "publish": [
+                        {
+                            "plugin_name": "kairosdb",
+                            "config": {
+                                "host": "127.0.0.1",
+                                "port": 2003
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
