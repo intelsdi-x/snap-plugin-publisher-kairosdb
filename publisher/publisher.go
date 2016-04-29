@@ -39,7 +39,7 @@ import (
 
 const (
 	name        = "kairos"
-	version     = 1
+	version     = 2
 	pluginType  = plugin.PublisherPluginType
 	publishPath = "/api/v1/datapoints"
 )
