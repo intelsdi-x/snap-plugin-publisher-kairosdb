@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -86,7 +87,7 @@ func (pub *publisher) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
 // Publish publishes metric data to Kairosdb
 func (pub *publisher) Publish(contentType string, content []byte, config map[string]ctypes.ConfigValue) error {
 	logger := getLogger(config)
-	var metrics []plugin.PluginMetricType
+	var metrics []plugin.MetricType
 
 	// decode content to metrics type
 	switch contentType {
@@ -111,7 +112,16 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 		tags := map[string]string{}
 
 		// at least one tag is required by KairosDB
-		tags["hostname"] = metric.Source()
+		if hostname, ok := metric.Tags()["hostname"]; ok {
+			tags["hostname"] = hostname
+		} else {
+			hostname, err := os.Hostname()
+			if err != nil {
+				tags["hostname"] = "localhost"
+			} else {
+				tags["hostname"] = hostname
+			}
+		}
 
 		// copy tags from metric
 		for key, value := range metric.Tags() {
@@ -120,7 +130,7 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 
 		// create KairosDB data point
 		point := kairos.DataPoint{
-			Name:      strings.Join(metric.Namespace(), "/"),
+			Name:      metric.Namespace().String(),
 			Value:     metric.Data(),
 			TimeStamp: metric.Timestamp().Unix(),
 			Tags:      tags,

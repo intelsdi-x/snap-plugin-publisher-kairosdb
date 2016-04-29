@@ -1,5 +1,3 @@
-// +build unit
-
 /*
 http://www.apache.org/licenses/LICENSE-2.0.txt
 Copyright 2016 Intel Corporation
@@ -34,6 +32,7 @@ import (
 
 	"github.com/intelsdi-x/snap/control/plugin"
 	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
+	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/ctypes"
 )
 
@@ -134,17 +133,17 @@ func (s *KairosSuite) TestPublish() {
 		cfg, _ := cp.Get([]string{""}).Process(config)
 
 		Convey("Publish provided metrics", func() {
-			metrics := []plugin.PluginMetricType{
-				plugin.PluginMetricType{
-					Namespace_: []string{"foo"},
+			metrics := []plugin.MetricType{
+				plugin.MetricType{
+					Namespace_: core.NewNamespace("foo"),
 					Timestamp_: time.Now(),
-					Source_:    "127.0.0.1",
+					Tags_:      map[string]string{"hostname": "127.0.0.1"},
 					Data_:      43,
 				},
-				plugin.PluginMetricType{
-					Namespace_: []string{"bar"},
+				plugin.MetricType{
+					Namespace_: core.NewNamespace("bar"),
 					Timestamp_: time.Now(),
-					Source_:    "127.0.0.1",
+					Tags_:      map[string]string{"hostname": "127.0.0.1"},
 					Data_:      44,
 				},
 			}
