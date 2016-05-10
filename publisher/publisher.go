@@ -34,6 +34,7 @@ import (
 	"github.com/intelsdi-x/snap/core/ctypes"
 
 	"github.com/intelsdi-x/snap-plugin-publisher-kairosdb/kairos"
+	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/serror"
 )
 
@@ -112,7 +113,7 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 		tags := map[string]string{}
 
 		// at least one tag is required by KairosDB
-		if hostname, ok := metric.Tags()["hostname"]; ok {
+		if hostname, ok := metric.Tags()[core.STD_TAG_PLUGIN_RUNNING_ON]; ok {
 			tags["hostname"] = hostname
 		} else {
 			hostname, err := os.Hostname()
