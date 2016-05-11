@@ -118,7 +118,7 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 		} else {
 			hostname, err := os.Hostname()
 			if err != nil {
-				tags["hostname"] = "localhost"
+				tags["hostname"] = "unknown"
 			} else {
 				tags["hostname"] = hostname
 			}
