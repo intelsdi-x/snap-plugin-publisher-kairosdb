@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -34,7 +33,6 @@ import (
 	"github.com/intelsdi-x/snap/core/ctypes"
 
 	"github.com/intelsdi-x/snap-plugin-publisher-kairosdb/kairos"
-	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/serror"
 )
 
@@ -110,31 +108,12 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 	// translate metrics to KairosDB publishing format
 	points := []kairos.DataPoint{}
 	for _, metric := range metrics {
-		tags := map[string]string{}
-
-		// at least one tag is required by KairosDB
-		if hostname, ok := metric.Tags()[core.STD_TAG_PLUGIN_RUNNING_ON]; ok {
-			tags["hostname"] = hostname
-		} else {
-			hostname, err := os.Hostname()
-			if err != nil {
-				tags["hostname"] = "unknown"
-			} else {
-				tags["hostname"] = hostname
-			}
-		}
-
-		// copy tags from metric
-		for key, value := range metric.Tags() {
-			tags[key] = value
-		}
-
 		// create KairosDB data point
 		point := kairos.DataPoint{
 			Name:      metric.Namespace().String(),
 			Value:     metric.Data(),
 			TimeStamp: metric.Timestamp().Unix(),
-			Tags:      tags,
+			Tags:      metric.Tags(),
 		}
 		points = append(points, point)
 	}
