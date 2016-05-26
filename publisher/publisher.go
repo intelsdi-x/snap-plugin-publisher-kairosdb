@@ -38,7 +38,7 @@ import (
 
 const (
 	name        = "kairos"
-	version     = 1
+	version     = 2
 	pluginType  = plugin.PublisherPluginType
 	publishPath = "/api/v1/datapoints"
 )
@@ -86,7 +86,7 @@ func (pub *publisher) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
 // Publish publishes metric data to Kairosdb
 func (pub *publisher) Publish(contentType string, content []byte, config map[string]ctypes.ConfigValue) error {
 	logger := getLogger(config)
-	var metrics []plugin.PluginMetricType
+	var metrics []plugin.MetricType
 
 	// decode content to metrics type
 	switch contentType {
@@ -108,22 +108,12 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 	// translate metrics to KairosDB publishing format
 	points := []kairos.DataPoint{}
 	for _, metric := range metrics {
-		tags := map[string]string{}
-
-		// at least one tag is required by KairosDB
-		tags["hostname"] = metric.Source()
-
-		// copy tags from metric
-		for key, value := range metric.Tags() {
-			tags[key] = value
-		}
-
 		// create KairosDB data point
 		point := kairos.DataPoint{
-			Name:      strings.Join(metric.Namespace(), "/"),
+			Name:      metric.Namespace().String(),
 			Value:     metric.Data(),
 			TimeStamp: metric.Timestamp().Unix(),
-			Tags:      tags,
+			Tags:      metric.Tags(),
 		}
 		points = append(points, point)
 	}
