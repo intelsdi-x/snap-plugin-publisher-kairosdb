@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -112,7 +113,7 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 		point := kairos.DataPoint{
 			Name:      metric.Namespace().String(),
 			Value:     metric.Data(),
-			TimeStamp: metric.Timestamp().Unix(),
+			TimeStamp: metric.Timestamp().UnixNano() / int64(time.Millisecond),
 			Tags:      metric.Tags(),
 		}
 		points = append(points, point)
