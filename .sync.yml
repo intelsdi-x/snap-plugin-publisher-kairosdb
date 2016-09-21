@@ -1,0 +1,12 @@
+.travis.yml:
+  deploy:
+    access_key_id: AKIAINMB43VSSPFZISAA
+    secret_access_key:
+      secure: DU8AIXDHH+4WajcTPh6v/WVLZK3J5lWhhePrbNYjZTXggATrS8VBe4q3lbcEBKHRPk/9h/c+keekbXbPlbLJITpTCpgiMUkh4X/SYOgmS6AUH/mVsrNzTFIgehlqhR3FncRqnqRLkqFY8qMayWhV31vIIxzi/GMDLllsIiSfZrG/4r5D7Q0EpaBohPhbzo355swcpq6AuWg2VLgC333Iqg7YTScnCSQoVV+rvF/g7lldQHFfsnyAIGRpNErrHEToFl5hYLW2YltgisPxbsiweonUK5p2+5yz+TdH/Rz147k2+Slt2Gc/ufPXb5KeG/6TLKOTI1ci+0EjRlrNExnkfS0FS+58akB5qe+VA9fFoEwSc+ySSD/aOx9ONy3QMeJjnQtDQlC8rV8MyJjTjUCU44vU9IcALZqWH+l0yQ7OCzoZa/ap8u75R1vPVP5b26qV9cdCt9ROSvHAwFASSWcByrgPdB7K5StivApNWv2EgNkZhm0CDqURTWdaOVZyP9Qd+BheXU1n3/LN7eYff4Vfl7xRwWlSTb1uKtqAby89knS14FazESHzDlzBebvuuRhltouJgc/64alX633W+zGZKneft/f3/DAqk2W0tPoT8l7R/rF+JZ4OQMbIO3IgiOZWzfFoJ5FkI93UV1wBXte9x+0ZGWCIFVptBC8EfNeB40s=
+    api_key:
+      secure: VfWlRJGmYYYXVG1D7U3phLlafiR2Yg1meoAfJQ1+0OlSmscVmp6DK+inr7RvvYQQe+PjG9pAOqJf7dtwE3mwSAo+FLX3uMhRRT2qRfla1qCGEMnmHhMqADCcmQGWFoT6ufBsd8Pz7ynJQNCHopErRVaV9cOoJwGS3Wvo4pH4QzesojP3KQlu7JHmYE56vhcsjvXSve8DqiXJF7vV5rPQ5fpm3e9GPfzxM4KVq93SqT06baN+xUksuRoYsPn1sbzH20dTA+TB/H8/oFOhPARXdrjuWfHQi5aTDXjikMHvq91P/5W6NuD0PB+V4rmxi9PlJJGpuSDAL1gkOqJcgPadYf08/PlkoXW4/OR6fsS5fruNaeXsyOfOgFbeHLC+1ns+l1z7Jngw6+YO4oN3jXtnQQ9CgBXNotsULwFBvde11BcAnv5SfTejVAa9HmehtXzkx/A69AT+ubXHBHfSKrtEENG3mrTEQz4x18ShvJbdG4FeswAZJkq0K2IJmyiTHHrWPOvFLPcnZzjgqb/0TdjC18jJxwCSyp6FT5/3ZmtnF3bNERryt4qP1paW/MX013zgOMNhq7/xHr2dzS947qDABycLEj6BRbYEXSbcEAXhbK+3CgBjBB8Rq1yqiI32xB8+S6IhsRmP9tXv4h2QIhavI95yr0f623jt2B67WJY7ZL0=
+scripts/deps.sh:
+  packages:
+    - github.com/smartystreets/goconvey # NOTE: this should be moved to godep/glide
+    - github.com/stretchr/testify/mock
+    - github.com/gorilla/mux
