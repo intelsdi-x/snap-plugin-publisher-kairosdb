@@ -62,6 +62,7 @@ deploy:
     secure: VfWlRJGmYYYXVG1D7U3phLlafiR2Yg1meoAfJQ1+0OlSmscVmp6DK+inr7RvvYQQe+PjG9pAOqJf7dtwE3mwSAo+FLX3uMhRRT2qRfla1qCGEMnmHhMqADCcmQGWFoT6ufBsd8Pz7ynJQNCHopErRVaV9cOoJwGS3Wvo4pH4QzesojP3KQlu7JHmYE56vhcsjvXSve8DqiXJF7vV5rPQ5fpm3e9GPfzxM4KVq93SqT06baN+xUksuRoYsPn1sbzH20dTA+TB/H8/oFOhPARXdrjuWfHQi5aTDXjikMHvq91P/5W6NuD0PB+V4rmxi9PlJJGpuSDAL1gkOqJcgPadYf08/PlkoXW4/OR6fsS5fruNaeXsyOfOgFbeHLC+1ns+l1z7Jngw6+YO4oN3jXtnQQ9CgBXNotsULwFBvde11BcAnv5SfTejVAa9HmehtXzkx/A69AT+ubXHBHfSKrtEENG3mrTEQz4x18ShvJbdG4FeswAZJkq0K2IJmyiTHHrWPOvFLPcnZzjgqb/0TdjC18jJxwCSyp6FT5/3ZmtnF3bNERryt4qP1paW/MX013zgOMNhq7/xHr2dzS947qDABycLEj6BRbYEXSbcEAXhbK+3CgBjBB8Rq1yqiI32xB8+S6IhsRmP9tXv4h2QIhavI95yr0f623jt2B67WJY7ZL0=
   file:
     - release/snap-plugin-publisher-kairosdb_linux_x86_64
+    - release/snap-plugin-publisher-kairosdb_darwin_x86_64
   skip_cleanup: true
   on:
     repo: intelsdi-x/snap-plugin-publisher-kairosdb
