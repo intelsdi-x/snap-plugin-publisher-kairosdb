@@ -1,4 +1,4 @@
-# snap publisher plugin - KairosDB 
+# Snap publisher plugin - KairosDB
 
 This plugin supports pushing metrics into an KairosDB instance.
 
@@ -22,7 +22,7 @@ It's used in the [snap framework](http://github.com/intelsdi-x/snap).
 
 ### System Requirements
 
-* [golang 1.5+](https://golang.org/dl/) for building plugin from source code
+* [golang 1.6+](https://golang.org/dl/) for building plugin from source code
 
 Support Matrix
 
@@ -35,10 +35,11 @@ All OSs currently supported by snap:
 ### Installation
 
 #### Download the plugin binary:
-You can get the pre-built binaries for your OS and architecture at snap's [GitHub Releases](https://github.com/intelsdi-x/snap/releases) page.
+You can get the pre-built binaries for your OS and architecture at plugin's [GitHub Releases](https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/releases) page.
 
 #### To build the plugin binary:
-Fork https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb  
+Fork https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb
+
 Clone repo into `$GOPATH/src/github.com/intelsdi-x/`:
 
 ```
@@ -49,7 +50,7 @@ Build the plugin by running make within the cloned repo:
 ```
 $ make
 ```
-This builds the plugin in `/build/rootfs/`
+This builds the plugin in `./build`
 
 ### Configuration and Usage
 * Set up the [snap framework](https://github.com/intelsdi-x/snap/blob/master/README.md#getting-started)
@@ -67,92 +68,75 @@ Task manifest configuration is described in [snap's documentation](https://githu
 See example task manifest in [examples/tasks/] (https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/blob/master/examples/tasks/).
 
 ### Examples
-Example of use snap-collector-mock1 collector plugin and KairosDB publisher plugin to save collecting data in KairosDB.
+Example of running [psutil collector plugin](https://github.com/intelsdi-x/snap-plugin-collector-psutil) and publishing data to KairosDB.
 
-Install and configure KairosDB, for help read [KarirosDB's documentation](https://kairosdb.github.io/docs/build/html/index.html).
+Set up the [Snap framework](https://github.com/intelsdi-x/snap/blob/master/README.md#getting-started)
 
-Make sure that your `$SNAP_PATH` is set, if not:
-```
-$ export SNAP_PATH=<snapDirectoryPath>/build
-```
-Other paths to files should be set according to your configuration, using a file you should indicate where it is located.
+Ensure [Snap daemon is running](https://github.com/intelsdi-x/snap#running-snap):
+* initd: `service snap-telemetry start`
+* systemd: `systemctl start snap-telemetry`
+* command line: `sudo snapd -l 1 -t 0 &`
 
-In one terminal window, open the snap daemon (in this case with logging set to 1 and trust disabled):
+Download and load Snap plugins (paths to binary files for Linux/amd64):
 ```
-$ $SNAP_PATH/bin/snapd -l 1 -t 0
-```
-
-In another terminal window:
-
-Load snap-collector-mock1 collector plugin:
-```
-$ $SNAP_PATH/bin/snapctl plugin load $SNAP_PATH/plugin/snap-collector-mock1
+$ wget http://snap.ci.snap-telemetry.io/plugins/snap-plugin-publisher-kairosdb/latest/linux/x86_64/snap-plugin-publisher-kairosdb
+$ wget http://snap.ci.snap-telemetry.io/plugins/snap-plugin-collector-psutil/latest/linux/x86_64/snap-plugin-collector-psutil
+$ snapctl plugin load snap-plugin-publisher-kairosdb
+$ snapctl plugin load snap-plugin-collector-psutil
 ```
 
-Load snap-plugin-publisher-kairosdb publisher plugin
-```
-$ $SNAP_PATH/bin/snapctl plugin load snap-plugin-publisher-kairosdb
-```
-
-See available metrics:
-```
-$ $SNAP_PATH/bin/snapctl metric list
-```
-
-Create a task manifest file to use snap-plugin-publisher-kairosdb plugin (exemplary files in [examples/tasks/] (https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/blob/master/examples/tasks/)):
+Create a [task manifest](https://github.com/intelsdi-x/snap/blob/master/docs/TASKS.md) (see [exemplary tasks](examples/tasks/)),
+for example `psutil-kairosdb.json` with following content:
 ```json
 {
-    "version": 1,
-    "schedule": {
-        "type": "simple",
-        "interval": "1s"
-    },
-    "workflow": {
-        "collect": {
-            "metrics": {
-                "/intel/mock/foo": {},
-                "/intel/mock/bar": {},
-                "/intel/mock/*/baz": {}
-            },
-            "config": {
-                "/intel/mock": {
-                    "user": "root",
-                    "password": "secret"
-                }
-            },
-            "process": [
-                {
-                    "plugin_name": "passthru",
-                    "process": null,
-                    "publish": [
-                        {
-                            "plugin_name": "kairosdb",
-                            "config": {
-                                "host": "127.0.0.1",
-                                "port": 2003
-                            }
-                        }
-                    ]
-                }
-            ]
+  "version": 1,
+  "schedule": {
+    "type": "simple",
+    "interval": "1s"
+  },
+  "workflow": {
+    "collect": {
+      "metrics": {
+        "/intel/psutil/load/load1": {},
+        "/intel/psutil/load/load15": {}
+      },
+      "publish": [
+        {
+          "plugin_name": "kairos",
+          "config": {
+           "host": "127.0.0.1",
+           "port": 8080
+          }
         }
+      ]
     }
+  }
 }
+
 ```
 Create a task:
 ```
-$ $SNAP_PATH/bin/snapctl task create -t task.json
+$ snapctl task create -t psutil-kairosdb.json
+```
+
+Watch created task:
+```
+$ snapctl task watch <task_id>
+```
+
+To stop previously created task:
+```
+$ snapctl task stop <task_id>
 ```
 
 ### Roadmap
-
 - alternative publishing method via telnet
 - alternative publishing method via Graphite protocol
 
 If you have a feature request, please add it as an [issue](https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/issues/new) and/or submit a [pull request](https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/pulls).
 
 ## Community Support
-This repository is one of **many** plugins in **snap**, a powerful telemetry framework. See the full project at http://github.com/intelsdi-x/snap.
+This repository is one of **many** plugins in **Snap**, a powerful telemetry framework. See the full project at http://github.com/intelsdi-x/snap.
 
 To reach out to other users, head to the [main framework](https://github.com/intelsdi-x/snap#community-support) or visit [snap Gitter channel](https://gitter.im/intelsdi-x/snap).
 
@@ -164,7 +148,7 @@ There's more than one way to give back, from examples to blogs to code updates. 
 And **thank you!** Your contribution, through code and participation, is incredibly important to us.
 
 ## License
-[snap](http://github.com/intelsdi-x/snap), along with this plugin, is an Open Source software released under the Apache 2.0 [License](LICENSE).
+[Snap](http://github.com/intelsdi-x/snap), along with this plugin, is an Open Source software released under the Apache 2.0 [License](LICENSE).
 
 ## Acknowledgements
 * Author: [Marcin Krolik](https://github.com/marcin-krolik)
