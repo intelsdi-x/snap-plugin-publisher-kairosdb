@@ -92,6 +92,7 @@ func (s *KairosSuite) TestGetConfigPolicy() {
 			testConfig := make(map[string]ctypes.ConfigValue)
 			testConfig["host"] = ctypes.ConfigValueStr{Value: "localhost"}
 			testConfig["port"] = ctypes.ConfigValueInt{Value: 8083}
+			testConfig["useDynamic"] = ctypes.ConfigValueBool{Value: true}
 
 			cfg, errs := configPolicy.Get([]string{""}).Process(testConfig)
 
@@ -120,40 +121,68 @@ func (s *KairosSuite) TestGetConfigPolicy() {
 
 func (s *KairosSuite) TestPublish() {
 	Convey("Given snap KairosDB publisher testing", s.T(), func() {
-		var buf bytes.Buffer
-		config := make(map[string]ctypes.ConfigValue)
-		u, _ := url.Parse(s.server.URL)
-		hostPort := strings.Split(u.Host, ":")
-		config["host"] = ctypes.ConfigValueStr{Value: hostPort[0]}
-		port, _ := strconv.Atoi(hostPort[1])
-		config["port"] = ctypes.ConfigValueInt{Value: port}
+		metrics := []plugin.MetricType{
+			plugin.MetricType{
+				Namespace_: core.NewNamespace("foo"),
+				Timestamp_: time.Now(),
+				Tags_:      map[string]string{"hostname": "127.0.0.1"},
+				Data_:      43,
+			},
+			plugin.MetricType{
+				Namespace_: core.NewNamespace("bar").AddDynamicElement("dynamic_element", "dynamic element of namespace"),
+				Timestamp_: time.Now(),
+				Tags_:      map[string]string{"hostname": "127.0.0.1"},
+				Data_:      44,
+			},
+		}
 
-		kp := New()
-		cp, _ := kp.GetConfigPolicy()
-		cfg, _ := cp.Get([]string{""}).Process(config)
+		Convey("Publishing dynamic elements of namespace as tags for metric", func() {
+			var buf bytes.Buffer
+			config := make(map[string]ctypes.ConfigValue)
+			u, _ := url.Parse(s.server.URL)
+			hostPort := strings.Split(u.Host, ":")
+			config["host"] = ctypes.ConfigValueStr{Value: hostPort[0]}
+			port, _ := strconv.Atoi(hostPort[1])
+			config["port"] = ctypes.ConfigValueInt{Value: port}
+			config["useDynamic"] = ctypes.ConfigValueBool{Value: true}
 
-		Convey("Publish provided metrics", func() {
-			metrics := []plugin.MetricType{
-				plugin.MetricType{
-					Namespace_: core.NewNamespace("foo"),
-					Timestamp_: time.Now(),
-					Tags_:      map[string]string{"hostname": "127.0.0.1"},
-					Data_:      43,
-				},
-				plugin.MetricType{
-					Namespace_: core.NewNamespace("bar"),
-					Timestamp_: time.Now(),
-					Tags_:      map[string]string{"hostname": "127.0.0.1"},
-					Data_:      44,
-				},
-			}
-			buf.Reset()
-			enc := gob.NewEncoder(&buf)
-			enc.Encode(metrics)
-			err := kp.Publish(plugin.SnapGOBContentType, buf.Bytes(), *cfg)
-			So(err, ShouldBeNil)
+			kp := New()
+			cp, _ := kp.GetConfigPolicy()
+			cfg, _ := cp.Get([]string{""}).Process(config)
+
+			Convey("Publish provided metrics", func() {
+
+				buf.Reset()
+				enc := gob.NewEncoder(&buf)
+				enc.Encode(metrics)
+				err := kp.Publish(plugin.SnapGOBContentType, buf.Bytes(), *cfg)
+				So(err, ShouldBeNil)
+			})
 		})
 
+		Convey("Publishing without dynamic elements of namespace as tags for metric", func() {
+			var buf bytes.Buffer
+			config := make(map[string]ctypes.ConfigValue)
+			u, _ := url.Parse(s.server.URL)
+			hostPort := strings.Split(u.Host, ":")
+			config["host"] = ctypes.ConfigValueStr{Value: hostPort[0]}
+			port, _ := strconv.Atoi(hostPort[1])
+			config["port"] = ctypes.ConfigValueInt{Value: port}
+			config["useDynamic"] = ctypes.ConfigValueBool{Value: false}
+
+			kp := New()
+			cp, _ := kp.GetConfigPolicy()
+			cfg, _ := cp.Get([]string{""}).Process(config)
+
+			Convey("Publish provided metrics", func() {
+
+				buf.Reset()
+				enc := gob.NewEncoder(&buf)
+				enc.Encode(metrics)
+				err := kp.Publish(plugin.SnapGOBContentType, buf.Bytes(), *cfg)
+				So(err, ShouldBeNil)
+			})
+		})
 	})
 }
 

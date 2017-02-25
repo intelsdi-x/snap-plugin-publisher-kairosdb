@@ -26,7 +26,8 @@
                             "plugin_name": "kairosdb",
                             "config": {
                                 "host": "127.0.0.1",
-                                "port": 2003
+                                "port": 2003,
+                                "useDynamic": true
                             }
                         }
                     ]
