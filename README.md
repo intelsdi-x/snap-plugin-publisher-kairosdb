@@ -64,11 +64,32 @@ For details on KairosDB, please refer to [documentation](https://kairosdb.github
 Task manifest configuration is described in [snap's documentation](https://github.com/intelsdi-x/snap/blob/master/docs/TASKS.md). In order to use KairosDB publisher you have to add section "publish" then specify following options:
 - `"host"` - KairosDB host address (ex. `"127.0.0.1"`)
 - `"port"` -  KairosDB REST API port (ex. `"8083"`)
+- `"useDynamic"` -  Use dynamic elements of namespace as tags for metric (ex. `true`)
+
+To know more about Dynamic Metric Namespace, please refer to [snap's documentation](https://github.com/intelsdi-x/snap/blob/master/docs/METRICS.md#dynamic-metrics)
 
 See example task manifest in [examples/tasks/] (https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/blob/master/examples/tasks/).
 
 ### Examples
 Example of running [psutil collector plugin](https://github.com/intelsdi-x/snap-plugin-collector-psutil) and publishing data to KairosDB.
+
+**Sample** *`useDynamic=false`*
+
+| metric | tags | value |
+|--------------------------|-------------------------|----|
+| /intel/psutil/cpu/0/user	| plugin_running_on=host1 | 12 |
+| /intel/psutil/cpu/1/user | plugin_running_on=host1 | 42 |
+
+
+**Sample** *`useDynamic=true`*
+
+| metric | tags | value |
+|------------------------|---------------------------------------------|----|
+| /intel/psutil/cpu/user | host=host1 cpu_id=0 plugin_running_on=host1 | 12 |
+| /intel/psutil/cpu/user | host=host1 cpu_id=1 plugin_running_on=host1 | 42 |
+
+
+Another example of running [psutil collector plugin](https://github.com/intelsdi-x/snap-plugin-collector-psutil) and publishing data to KairosDB.
 
 Set up the [Snap framework](https://github.com/intelsdi-x/snap/blob/master/README.md#getting-started)
 
@@ -105,7 +126,8 @@ for example `psutil-kairosdb.json` with following content:
           "plugin_name": "kairos",
           "config": {
            "host": "127.0.0.1",
-           "port": 8080
+           "port": 8080,
+           "useDynamic": true
           }
         }
       ]

@@ -31,6 +31,7 @@ import (
 
 	"github.com/intelsdi-x/snap/control/plugin"
 	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
+	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/ctypes"
 
 	"github.com/intelsdi-x/snap-plugin-publisher-kairosdb/kairos"
@@ -39,7 +40,7 @@ import (
 
 const (
 	name        = "kairos"
-	version     = 2
+	version     = 3
 	pluginType  = plugin.PublisherPluginType
 	publishPath = "/api/v1/datapoints"
 )
@@ -80,6 +81,14 @@ func (pub *publisher) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
 	r2.Description = "KairosDB port"
 	config.Add(r2)
 
+	r3, err := cpolicy.NewBoolRule("useDynamic", true)
+	if err != nil {
+		fields := map[string]interface{}{"StringRule": "useDynamic"}
+		return nil, serror.New(err, fields)
+	}
+	r3.Description = "Use dynamic namespaces for metric and tags"
+	config.Add(r3)
+
 	cp.Add([]string{""}, config)
 	return cp, nil
 }
@@ -88,6 +97,7 @@ func (pub *publisher) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
 func (pub *publisher) Publish(contentType string, content []byte, config map[string]ctypes.ConfigValue) error {
 	logger := getLogger(config)
 	var metrics []plugin.MetricType
+	useDynamic := config["useDynamic"].(ctypes.ConfigValueBool).Value
 
 	// decode content to metrics type
 	switch contentType {
@@ -109,14 +119,46 @@ func (pub *publisher) Publish(contentType string, content []byte, config map[str
 	// translate metrics to KairosDB publishing format
 	points := []kairos.DataPoint{}
 	for _, metric := range metrics {
+		isDynamic, indexes := metric.Namespace().IsDynamic()
+		ns := metric.Namespace().Strings()
+		tags := metric.Tags()
+
 		// create KairosDB data point
-		point := kairos.DataPoint{
-			Name:      metric.Namespace().String(),
-			Value:     metric.Data(),
-			TimeStamp: metric.Timestamp().UnixNano() / int64(time.Millisecond),
-			Tags:      metric.Tags(),
+		if useDynamic {
+			tempTags := make(map[string]string)
+			if isDynamic {
+				for i, j := range indexes {
+					// The second return value from IsDynamic(), in this case `indexes`, is the index of
+					// the dynamic element in the unmodified namespace. However, here we're deleting
+					// elements, which is problematic when the number of dynamic elements in a namespace is
+					// greater than 1. Therefore, we subtract i (the loop iteration) from j
+					// (the original index) to compensate.
+					//
+					// Remove "data" from the namespace and create a tag for it
+					ns = append(ns[:j-i], ns[j-i+1:]...)
+					tempTags[metric.Namespace()[j].Name] = string(metric.Namespace()[j].Value)
+				}
+			}
+			for k, v := range tags {
+				tempTags[k] = string(v)
+			}
+			tempTags["host"] = string(tags[core.STD_TAG_PLUGIN_RUNNING_ON])
+			point := kairos.DataPoint{
+				Name:      "/" + strings.Join(ns, "/"),
+				Value:     metric.Data(),
+				TimeStamp: metric.Timestamp().UnixNano() / int64(time.Millisecond),
+				Tags:      tempTags,
+			}
+			points = append(points, point)
+		} else {
+			point := kairos.DataPoint{
+				Name:      metric.Namespace().String(),
+				Value:     metric.Data(),
+				TimeStamp: metric.Timestamp().UnixNano() / int64(time.Millisecond),
+				Tags:      metric.Tags(),
+			}
+			points = append(points, point)
 		}
-		points = append(points, point)
 	}
 
 	// serialization
