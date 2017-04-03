@@ -60,7 +60,7 @@ This builds the plugin in `./build`
 
 For details on KairosDB, please refer to [documentation](https://kairosdb.github.io/docs/build/html/index.html).
 
-###Task manifest
+### Task manifest
 Task manifest configuration is described in [snap's documentation](https://github.com/intelsdi-x/snap/blob/master/docs/TASKS.md). In order to use KairosDB publisher you have to add section "publish" then specify following options:
 - `"host"` - KairosDB host address (ex. `"127.0.0.1"`)
 - `"port"` -  KairosDB REST API port (ex. `"8083"`)
@@ -68,7 +68,7 @@ Task manifest configuration is described in [snap's documentation](https://githu
 
 To know more about Dynamic Metric Namespace, please refer to [snap's documentation](https://github.com/intelsdi-x/snap/blob/master/docs/METRICS.md#dynamic-metrics)
 
-See example task manifest in [examples/tasks/] (https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/blob/master/examples/tasks/).
+See example task manifest in [examples/tasks/](https://github.com/intelsdi-x/snap-plugin-publisher-kairosdb/blob/master/examples/tasks/).
 
 ### Examples
 Example of running [psutil collector plugin](https://github.com/intelsdi-x/snap-plugin-collector-psutil) and publishing data to KairosDB.
